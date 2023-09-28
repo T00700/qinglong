@@ -407,8 +407,16 @@ init_nginx() {
   local aliasStr=""
   local rootStr=""
   if [[ $ql_base_url != "/" ]]; then
+    if [[ $ql_base_url != /* ]]; then
+      ql_base_url="/$ql_base_url"
+    fi
+    if [[ $ql_base_url != */ ]]; then
+      ql_base_url="$ql_base_url/"
+    fi
     location_url="^~${ql_base_url%*/}"
     aliasStr="alias ${dir_static}/dist;"
+    awk -v text="<base href=\"$ql_base_url\">" '/<link/ && !inserted {print text; inserted=1} 1' "${dir_static}/dist/index.html" > temp.html
+    mv temp.html "${dir_static}/dist/index.html"
   else
     rootStr="root ${dir_static}/dist;"
   fi
